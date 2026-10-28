@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Uniq</title>
+<meta name="description" content="Uniq — знакомства студентов со всех вузов РФ в Telegram">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: светлый минимал — белый фон, одно мягкое цветное свечение у героя,
+   стеклянная карточка анкеты, плотный гротеск Onest; секции на одной сетке, акцент розово‑фиолетовый */
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --soft: #f2f1f6;
+  --line: #e6e4ee;
+  --text: #101014;
+  --muted: #5f5f6b;
+  --faint: #8a8a96;
+  --pink: #ff6b9a;
+  --violet: #8a6bff;
+  --grad: linear-gradient(120deg, #ff6b9a, #8a6bff);
+  --font: "Onest", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--violet); outline-offset: 3px; border-radius: 8px; }
+
+/* Шапка */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: rgba(250,250,250,.8); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 800; font-size: 22px; letter-spacing: -.035em; }
+.brand svg { width: 32px; height: 32px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--font); font-weight: 700; font-size: 16px; text-decoration: none; color: #fff; background: var(--text); border-radius: 14px; padding: 14px 24px; white-space: nowrap; transition: transform .2s ease, box-shadow .2s ease; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -14px rgba(16,16,20,.5); }
+.btn.small { padding: 10px 18px; font-size: 14px; border-radius: 12px; }
+.btn.ghost { background: transparent; color: var(--text); border: 1.5px solid var(--line); }
+.btn.ghost:hover { border-color: var(--faint); box-shadow: none; }
+
+/* Герой */
+.hero { position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; width: 620px; height: 620px; right: -160px; top: -200px; border-radius: 50%; background: conic-gradient(from 200deg, #ffb3c7, #c4b5ff, #a8e6ff, #ffb3c7); filter: blur(80px); opacity: .75; pointer-events: none; }
+.hero .wrap { position: relative; display: grid; grid-template-columns: 1.1fr .9fr; gap: 56px; align-items: center; padding-block: 80px 96px; }
+.hero .wrap > * { min-width: 0; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--violet); }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(40px, 6.2vw, 72px); line-height: 1.02; font-weight: 800; letter-spacing: -.03em; margin-top: 18px; }
+h1 em { font-style: normal; color: var(--faint); }
+.lead { font-size: clamp(17px, 2vw, 20px); color: var(--muted); max-width: 36ch; margin: 22px 0 32px; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.handle { font-size: 14px; color: var(--muted); }
+.handle b { color: var(--text); }
+
+/* Стеклянная карточка анкеты */
+.phone { justify-self: center; width: min(330px, 100%); border-radius: 30px; padding: 12px; background: rgba(255,255,255,.66); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.95); box-shadow: 0 40px 70px -36px rgba(40,30,80,.4); animation: float 6s ease-in-out infinite; }
+@keyframes float { 50% { transform: translateY(-10px); } }
+.photo { aspect-ratio: 4 / 4.3; max-width: 100%; border-radius: 22px; position: relative; overflow: hidden;
+  background: radial-gradient(circle at 50% 40%, #f2c9b3 0 17%, transparent 17.5%), radial-gradient(ellipse at 50% 100%, #ffffff 0 40%, transparent 40.5%), radial-gradient(circle at 50% 32%, #4a3426 0 24%, transparent 24.5%), linear-gradient(160deg, #ffd3e0, #d6ccff); }
+.photo .dots { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; gap: 6px; }
+.photo .dots i { flex: 1; height: 3px; border-radius: 3px; background: rgba(16,16,20,.15); }
+.photo .dots i:first-child { background: var(--text); }
+.card-info { padding: 14px 6px 6px; }
+.card-info h3 { font-size: 21px; font-weight: 800; letter-spacing: -.02em; }
+.meta { font-size: 14px; color: var(--muted); margin-top: 4px; display: grid; gap: 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.chip { font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; background: var(--soft); }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.actions span { display: grid; place-items: center; height: 50px; border-radius: 16px; font-size: 20px; background: var(--soft); }
+.actions span.like { background: var(--text); color: var(--pink); }
+
+/* Секции */
+section.block .wrap { padding-block: 88px; }
+.block + .block .wrap { border-top: 1px solid var(--line); }
+.head { display: grid; gap: 14px; max-width: 720px; margin-bottom: 44px; }
+h2 { font-size: clamp(30px, 4.2vw, 48px); line-height: 1.08; font-weight: 800; letter-spacing: -.025em; }
+.head p { margin: 0; color: var(--muted); max-width: 60ch; }
+
+.steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: s; }
+.steps li { counter-increment: s; padding: 26px 22px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); display: grid; gap: 10px; align-content: start; min-width: 0; }
+.steps li::before { content: counter(s, decimal-leading-zero); font-weight: 800; font-size: 14px; letter-spacing: .04em; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.steps h3 { font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+.steps p { margin: 0; color: var(--muted); font-size: 15.5px; }
+
+.figures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 36px; }
+.figure { padding: 24px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
+.figure b { display: block; font-size: clamp(38px, 5vw, 56px); font-weight: 800; letter-spacing: -.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+.figure span { color: var(--muted); font-size: 15px; }
+.unis { display: flex; flex-wrap: wrap; gap: 8px; }
+.unis span { font-size: 14px; font-weight: 600; padding: 8px 14px; border-radius: 999px; background: var(--soft); }
+.unis span.more { background: transparent; border: 1px dashed var(--faint); color: var(--muted); }
+.note { margin-top: 22px; color: var(--muted); font-size: 15px; }
+.note b { color: var(--text); }
+
+.goals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.goal { padding: 28px 24px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); display: grid; gap: 8px; min-width: 0; }
+.goal .ico { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; font-size: 26px; background: var(--soft); }
+.goal h3 { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+.goal p { margin: 0; color: var(--muted); font-size: 15.5px; }
+
+.safety { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 40px; list-style: none; padding: 0; margin: 0; }
+.safety li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; min-width: 0; }
+.safety li::before { content: "✓"; width: 24px; height: 24px; margin-top: 2px; border-radius: 8px; display: grid; place-items: center; font-size: 13px; font-weight: 800; color: #fff; background: var(--grad); }
+.safety b { display: block; }
+.safety span { color: var(--muted); font-size: 15.5px; }
+
+.faq { display: grid; gap: 10px; max-width: 780px; }
+.faq details { border: 1px solid var(--line); border-radius: 18px; background: var(--surface); }
+.faq summary { cursor: pointer; padding: 18px 22px; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; font-weight: 700; font-size: 20px; line-height: 1.2; color: var(--violet); transition: transform .2s; }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq p { margin: 0; padding: 0 22px 18px; color: var(--muted); }
+
+.final .wrap { padding-block: 40px 96px; }
+.final-box { border-radius: 32px; padding: clamp(36px, 6vw, 72px); text-align: center; position: relative; overflow: hidden; background: var(--surface); border: 1px solid var(--line); display: grid; justify-items: center; gap: 18px; }
+.final-box::before { content: ""; position: absolute; width: 520px; height: 520px; left: 50%; top: -340px; translate: -50% 0; border-radius: 50%; background: conic-gradient(from 90deg, #ffb3c7, #c4b5ff, #a8e6ff, #ffb3c7); filter: blur(70px); opacity: .7; pointer-events: none; }
+.final-box > * { position: relative; }
+.final-box svg { width: 80px; height: 80px; animation: beat 2.4s ease-in-out infinite; }
+@keyframes beat { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.08); } 24% { transform: scale(1); } }
+.final-box p { margin: 0; color: var(--muted); max-width: 46ch; }
+
+footer .wrap { padding-block: 28px 40px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+
+@media (max-width: 920px) {
+  .hero .wrap { grid-template-columns: 1fr; padding-block: 48px 64px; gap: 44px; }
+  .steps { grid-template-columns: 1fr 1fr; }
+  .goals { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  .top .btn { display: none; }
+  .steps, .figures, .safety { grid-template-columns: 1fr; }
+  section.block .wrap { padding-block: 64px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phone, .final-box svg { animation: none; }
+  html { scroll-behavior: auto; }
+  .btn { transition: none; }
+}
+</style>
+<meta property="og:title" content="Uniq — знакомства студентов">
+<meta property="og:description" content="Знакомства студентов со всех вузов РФ в Telegram. Контакты — только с согласия обоих.">
+<meta property="og:image" content="preview.png">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="heartGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff6b9a"/><stop offset="1" stop-color="#8a6bff"/>
+    </linearGradient>
+    <symbol id="logo" viewBox="0 0 64 64">
+      <path d="M32 56S8 41.5 5 26.5C3 16.5 9.5 10 17.5 10c6 0 10 3.5 14.5 9 4.5-5.5 8.5-9 14.5-9C54.5 10 61 16.5 59 26.5 56 41.5 32 56 32 56z" fill="url(#heartGrad)"/>
+      <g transform="rotate(-12 42 12)">
+        <path d="M30 12 42 5l12 7-12 7z" fill="#101014"/>
+        <path d="M35.5 14.5v5.5c4 2.2 9 2.2 13 0v-5.5L42 18z" fill="#101014"/>
+        <path d="M42 12h9v8" fill="none" stroke="#ff6b9a" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="51" cy="21" r="2.2" fill="#ff6b9a"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Uniq — в начало"><svg aria-hidden="true"><use href="#logo"/></svg>Uniq</a>
+    <a class="btn small" href="https://t.me/uniqdate_bot" target="_blank" rel="noopener">Открыть в Telegram</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow">Знакомства студентов · Telegram</div>
+        <h1>Твой человек учится <em>где&#8209;то рядом.</em></h1>
+        <p class="lead">Uniq знакомит студентов из твоего вуза и из любого другого. Ставь лайки, лови взаимность, общайся.</p>
+        <div class="cta-row">
+          <a class="btn" href="https://t.me/uniqdate_bot" target="_blank" rel="noopener">Найти своих в Uniq</a>
+          <a class="btn ghost" href="#how">Как это работает</a>
+        </div>
+        <p class="handle">Бот в Telegram: <b>@uniqdate_bot</b></p>
+      </div>
+
+      <div class="phone" aria-label="Пример анкеты в Uniq">
+        <div class="photo"><div class="dots"><i></i><i></i><i></i></div></div>
+        <div class="card-info">
+          <h3>Аня, 20</h3>
+          <div class="meta">
+            <span>🎓 НИУ ВШЭ · 2 курс · ФКН</span>
+            <span>📍 Москва · 🤝 Дружба</span>
+          </div>
+          <div class="chips"><span class="chip">Кино</span><span class="chip">Кофе</span><span class="chip">Настолки</span><span class="chip">Стендап</span></div>
+          <div class="actions" aria-hidden="true"><span>✕</span><span class="like">♥</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="how">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">Как это работает</div>
+        <h2>От анкеты до контакта за четыре шага</h2>
+      </div>
+      <ol class="steps">
+        <li><h3>Анкета за пару минут</h3><p>Вуз, факультет, курс, интересы и от 1 до 3 фото. Всё кнопками, писать почти ничего не нужно.</p></li>
+        <li><h3>Листай анкеты</h3><p>Свой вуз, весь город или вся Россия. Возраст, курс и цель знакомства — в фильтрах.</p></li>
+        <li><h3>Лайк в ответ — мэтч</h3><p>Если симпатия взаимная, Uniq сразу сообщит вам обоим и покажет анкету.</p></li>
+        <li><h3>Контакты по согласию</h3><p>Ник в Telegram открывается, только когда оба нажали «Поделиться контактом».</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="unis">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">Вузы</div>
+        <h2>Свой вуз, соседний или в другом городе</h2>
+        <p>В Москве и Петербурге можно выбрать даже факультет — кнопкой, по-студенчески: Мехмат, ФКН, ИУ, Матмех.</p>
+      </div>
+      <div class="figures">
+        <div class="figure"><b>30</b><span>вузов в списке</span></div>
+        <div class="figure"><b>8</b><span>городов</span></div>
+        <div class="figure"><b>261</b><span>факультет и институт</span></div>
+      </div>
+      <div class="unis">
+        <span>МГУ</span><span>НИУ ВШЭ</span><span>МФТИ</span><span>МГТУ им. Баумана</span><span>МГИМО</span><span>РЭУ им. Плеханова</span><span>Финуниверситет</span><span>РУДН</span><span>МИФИ</span><span>МИСИС</span><span>СПбГУ</span><span>ИТМО</span><span>СПбПУ</span><span>ЛЭТИ</span><span>УрФУ</span><span>КФУ</span><span>НГУ</span><span>ТГУ</span><span>ТПУ</span><span>СФУ</span><span class="more">и ещё 10</span>
+      </div>
+      <p class="note">Нет твоего вуза? Нажми <b>«Моего вуза нет»</b> при заполнении анкеты — добавим и напишем тебе.</p>
+    </div>
+  </section>
+
+  <section class="block" id="goals">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">Зачем приходят</div>
+        <h2>Каждый сам выбирает, что ищет</h2>
+        <p>Цель видна в анкете и есть в фильтрах, так что ожидания совпадают с первого лайка.</p>
+      </div>
+      <div class="goals">
+        <div class="goal"><div class="ico">💘</div><h3>Отношения</h3><p>Познакомиться с тем, кто проходит те же пары, сессии и общаги.</p></div>
+        <div class="goal"><div class="ico">🤝</div><h3>Дружба</h3><p>Найти компанию на концерт, в зал или на марафон перед экзаменом.</p></div>
+        <div class="goal"><div class="ico">💬</div><h3>Общение</h3><p>Поболтать со студентами из другого города и вуза.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="safety">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">Безопасность</div>
+        <h2>Контакты — только когда оба за</h2>
+      </div>
+      <ul class="safety">
+        <li><div><b>Без случайных сообщений</b><span>Написать тебе можно только после взаимного лайка и твоего согласия.</span></div></li>
+        <li><div><b>Без ссылок и телефонов в анкетах</b><span>Uniq не пропустит в анкету ники, ссылки и номера.</span></div></li>
+        <li><div><b>Жалобы и модерация</b><span>После нескольких жалоб анкета скрывается до проверки модератором.</span></div></li>
+        <li><div><b>Блокировка в одно нажатие</b><span>Заблокированный человек больше никогда тебя не увидит.</span></div></li>
+        <li><div><b>Можно скрыться</b><span>Спрячь анкету из ленты, когда хочешь отдохнуть от знакомств.</span></div></li>
+        <li><div><b>Данные удаляются полностью</b><span>Настройки → «Удалить аккаунт» стирает анкету, фото, лайки и мэтчи.</span></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" id="faq">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">Вопросы</div>
+        <h2>Коротко о главном</h2>
+      </div>
+      <div class="faq">
+        <details><summary>Это бесплатно?</summary><p>Да. Анкета, лента, лайки, мэтчи и обмен контактами бесплатны.</p></details>
+        <details><summary>Нужно что-то скачивать?</summary><p>Нет, Uniq работает прямо в Telegram. Открой @uniqdate_bot и нажми «Запустить».</p></details>
+        <details><summary>Кто увидит мою анкету?</summary><p>Студенты, чьи фильтры подходят под тебя: по вузу, городу, возрасту и тому, кого они ищут. А ты сам выбираешь, кого показывать тебе.</p></details>
+        <details><summary>Сколько лайков можно поставить?</summary><p>До 50 в день. Так лента остаётся живой, а лайк что-то значит.</p></details>
+        <details><summary>Как удалить данные?</summary><p>В боте: ⚙️ Настройки → «Удалить аккаунт». Удаляется всё сразу, без заявок и ожидания.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <div class="final-box">
+        <svg aria-hidden="true"><use href="#logo"/></svg>
+        <h2>Пара найдётся после пар</h2>
+        <p>Заполни анкету за пару минут и посмотри, кто учится рядом.</p>
+        <a class="btn" href="https://t.me/uniqdate_bot" target="_blank" rel="noopener">Открыть @uniqdate_bot</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Uniq — знакомства студентов со всех вузов РФ</span>
+    <span>Telegram: @uniqdate_bot</span>
+  </div>
+</footer>
+</body>
+</html>
